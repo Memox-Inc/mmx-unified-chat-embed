@@ -1,10 +1,13 @@
+/* eslint-disable react/jsx-key */
 //imports
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+// import { motion, AnimatePresence } from 'framer-motion';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
     Card,
     CardContent,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     CardDescription,
     CardFooter,
     CardHeader,
@@ -43,28 +46,11 @@ type Props = {
 type Message = {
     sessionId: string;
     id: number;
-    content: string;
-    sender: 'user' | 'other' | 'ai';
+    text: string;
+    sender: 'User' | 'Agent' | 'AI';
     timestamp?: string;
     image?: string;
 };
-
-//animation props
-
-const backdropVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-};
-
-const modalVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1 },
-};
-
-
-const messages_test: Message[] = [
-    { sessionId: "test", id: 1, content: "Hello", sender: 'user', timestamp: "19:32", image: "/img/test.jpg" },
-];
 
 //Component
 const ChatWindowComponent = ({
@@ -80,19 +66,65 @@ const ChatWindowComponent = ({
 }: Props) => {
     // State Management
     const [currentMessage, setCurrentMessage] = useState('');
-    const [messages, setMessages] = useState<Message[]>(messages_test);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const messagesEndRef = useRef<HTMLInputElement>(null);
+    const socketRef = useRef<WebSocket | null>(null);
+    const isWebSocketConnected = useRef(false);  // Track WebSocket connection status
+
+
+
+
+
     // State for the selected image
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     // Send Message function
     const sendMessage = (messageContent: string) => {
         if (messageContent.trim() === '') return; // Prevent sending empty messages
         setMessages([
             ...messages,
-            { sessionId: "test", id: messages.length + 1, content: messageContent, sender: 'user' },
+            { sessionId: "test", id: messages.length + 1, text: messageContent, sender: 'User' },
         ]);
         setCurrentMessage('');
     };
 
+    useEffect(() =>{
+        if (!isWebSocketConnected.current) {
+        const chatID = uuidv4()
+        const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/`)
+        socketRef.current = ws;
+        isWebSocketConnected.current = true; // Set to true to prevent future connections
+        ws.onopen = () =>{
+          console.log('Websocket Connectin Open....')
+        }
+        ws.onmessage = (event) =>{
+          const msgData = JSON.parse(event.data)
+          console.log(messages)
+          console.log('Server Message',msgData)
+          setMessages((prevMessages) => [...prevMessages, msgData]);
+          // console.log('Message Recieved from server...', event.data)
+        }
+        ws.onclose = () =>{
+          console.error('Websocket Connection closed unexpectedly....')
+        }
+    }
+        return () => {
+        socketRef.current?.close();
+        socketRef.current = null;  // Reset the socket reference       
+        isWebSocketConnected.current = false; // Reset flag on cleanup
+
+        };
+    
+      },[])
+
+      useEffect(() =>{
+        scrollToBottom();
+      },[messages])
+
+      const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      };
+    
     //Reset the chat window
     const resetChat = () => {
         setMessages([]);
@@ -182,7 +214,7 @@ const ChatWindowComponent = ({
 
                                         <div
                                             key={message.id}
-                                            className={`${message.sender === 'user'
+                                            className={`${message.sender === 'User'
                                                 ? `${userMessageColor} ${userTextColor} self-end`
                                                 : `${aiMessageColor} ${aiTextColor} self-start`
                                                 } p-2 rounded-lg max-w-xs`}
@@ -201,7 +233,7 @@ const ChatWindowComponent = ({
                                                     </div>
                                                 )}
                                                 <div>
-                                                    {message.content}
+                                                    {message.text}
                                                 </div>
                                             </div>
                                         </div>
@@ -214,6 +246,7 @@ const ChatWindowComponent = ({
 
                             </div>
                         ))}
+                        <div ref={messagesEndRef} />
                     </CardContent>
                     <Separator className='mt-4' />
 
@@ -262,7 +295,11 @@ const ChatWindowComponent = ({
                             <form
                                 onSubmit={(e) => {
                                     e.preventDefault();
-                                    sendMessage(currentMessage);
+                                    // sendMessage(currentMessage);
+                                    setCurrentMessage('');
+                                    socketRef.current?.send(JSON.stringify({
+                                        'message': currentMessage
+                                      }))
                                 }}
                                 className='grid grid-cols-9 w-full justify-between space-x-4 items-center'
                             >
@@ -280,7 +317,7 @@ const ChatWindowComponent = ({
                 </Card>
 
             </div>
-            {chatOpen && (
+            {/* {chatOpen && (
                 <AnimatePresence>
                     {selectedImage && (
                         <>
@@ -319,7 +356,7 @@ const ChatWindowComponent = ({
                     )}
                 </AnimatePresence>
 
-            )}
+            )} */}
 
 
         </div>
