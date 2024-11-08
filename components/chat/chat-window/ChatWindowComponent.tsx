@@ -99,10 +99,7 @@ const ChatWindowComponent = ({
         }
         ws.onmessage = (event) =>{
           const msgData = JSON.parse(event.data)
-          console.log(messages)
-          console.log('Server Message',msgData)
           setMessages((prevMessages) => [...prevMessages, msgData]);
-          // console.log('Message Recieved from server...', event.data)
         }
         ws.onclose = () =>{
           console.error('Websocket Connection closed unexpectedly....')
