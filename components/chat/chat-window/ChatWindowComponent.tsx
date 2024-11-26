@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/jsx-key */
 //imports
 import React, { useEffect, useRef, useState } from 'react';
