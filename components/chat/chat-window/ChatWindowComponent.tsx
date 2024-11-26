@@ -46,9 +46,9 @@ type Props = {
 type Message = {
     sessionId: string;
     id: number;
-    text: string;
-    sender: 'User' | 'Agent' | 'AI';
-    timestamp?: string;
+    content: string;
+    sender: 'prospect' | 'sales_rep' | 'ai';
+    created_at?: string;
     image?: string;
 };
 
@@ -83,7 +83,7 @@ const ChatWindowComponent = ({
         if (messageContent.trim() === '') return; // Prevent sending empty messages
         setMessages([
             ...messages,
-            { sessionId: "test", id: messages.length + 1, text: messageContent, sender: 'User' },
+            { sessionId: "test", id: messages.length + 1, content: messageContent, sender: 'prospect' },
         ]);
         setCurrentMessage('');
     };
@@ -211,7 +211,7 @@ const ChatWindowComponent = ({
 
                                         <div
                                             key={message.id}
-                                            className={`${message.sender === 'User'
+                                            className={`${message.sender === 'prospect'
                                                 ? `${userMessageColor} ${userTextColor} self-end`
                                                 : `${aiMessageColor} ${aiTextColor} self-start`
                                                 } p-2 rounded-lg max-w-xs`}
@@ -230,7 +230,7 @@ const ChatWindowComponent = ({
                                                     </div>
                                                 )}
                                                 <div>
-                                                    {message.text}
+                                                    {message.content}
                                                 </div>
                                             </div>
                                         </div>
