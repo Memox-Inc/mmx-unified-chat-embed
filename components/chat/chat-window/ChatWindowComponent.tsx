@@ -92,7 +92,7 @@ const ChatWindowComponent = ({
     useEffect(() =>{
         if (!isWebSocketConnected.current) {
         const chatID = uuidv4()
-        const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/`)
+        const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/?org=1`)
         socketRef.current = ws;
         isWebSocketConnected.current = true; // Set to true to prevent future connections
         ws.onopen = () =>{
