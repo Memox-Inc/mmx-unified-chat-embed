@@ -48,7 +48,8 @@ type Message = {
     sessionId: string;
     id: number;
     content: string;
-    sender: 'prospect' | 'sales_rep' | 'ai';
+    sender?: 'prospect' | 'sales_rep' | 'ai';
+    sender_type?: 'prospect' | 'sales_rep' | 'ai';
     created_at?: string;
     image?: string;
 };
@@ -82,10 +83,14 @@ const ChatWindowComponent = ({
     // Send Message function
     const sendMessage = (messageContent: string) => {
         if (messageContent.trim() === '') return; // Prevent sending empty messages
-        setMessages([
-            ...messages,
-            { sessionId: "test", id: messages.length + 1, content: messageContent, sender: 'prospect' },
-        ]);
+        // setMessages([
+        //     ...messages,
+        //     { sessionId: "test", id: messages.length + 1, content: messageContent, sender: 'prospect' },
+        // ]);
+        socketRef.current?.send(JSON.stringify({
+            'message': messageContent
+          }))
+
         setCurrentMessage('');
     };
 
@@ -127,6 +132,8 @@ const ChatWindowComponent = ({
     const resetChat = () => {
         setMessages([]);
     }
+
+    console.log(messages,'my messages')
 
     return (
         <div>
@@ -212,7 +219,7 @@ const ChatWindowComponent = ({
 
                                         <div
                                             key={message.id}
-                                            className={`${message.sender === 'prospect'
+                                            className={`${message.sender_type === 'prospect' || message.sender === 'prospect'
                                                 ? `${userMessageColor} ${userTextColor} self-end`
                                                 : `${aiMessageColor} ${aiTextColor} self-start`
                                                 } p-2 rounded-lg max-w-xs`}
