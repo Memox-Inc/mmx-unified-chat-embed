@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+      "lib": ["dom", "dom.iterable", "esnext"],
+      "target": "es5",
+      "allowJs": true,
+      "skipLibCheck": true,
+      "strict": true,
+      "esModuleInterop": true,
+      "module": "esnext",
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "declaration": true,
+      "declarationDir": "dist/types",
+      "emitDeclarationOnly": false,
+      "outDir": "dist",
+      "jsx": "preserve", // Let Babel handle JSX
+      "noEmit": false,
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["*"]
+      }
+    },
+    "include": ["components/**/*"],
+    "exclude": ["node_modules", "**/*.stories.tsx", "**/*.test.tsx"]
+  }
+  
