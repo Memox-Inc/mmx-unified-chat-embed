@@ -89,51 +89,51 @@ const ChatWindowComponent = ({
         // ]);
         socketRef.current?.send(JSON.stringify({
             'message': messageContent
-          }))
+        }))
 
         setCurrentMessage('');
     };
 
-    useEffect(() =>{
+    useEffect(() => {
         if (!isWebSocketConnected.current) {
-        const chatID = uuidv4()
-        const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/?org=1`)
-        socketRef.current = ws;
-        isWebSocketConnected.current = true; // Set to true to prevent future connections
-        ws.onopen = () =>{
-          console.log('Websocket Connectin Open....')
+            const chatID = uuidv4()
+            const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/?org=1`)
+            socketRef.current = ws;
+            isWebSocketConnected.current = true; // Set to true to prevent future connections
+            ws.onopen = () => {
+                console.log('Websocket Connectin Open....')
+            }
+            ws.onmessage = (event) => {
+                const msgData = JSON.parse(event.data)
+                setMessages((prevMessages) => [...prevMessages, msgData]);
+            }
+            ws.onclose = () => {
+                console.error('Websocket Connection closed unexpectedly....')
+            }
         }
-        ws.onmessage = (event) =>{
-          const msgData = JSON.parse(event.data)
-          setMessages((prevMessages) => [...prevMessages, msgData]);
-        }
-        ws.onclose = () =>{
-          console.error('Websocket Connection closed unexpectedly....')
-        }
-    }
         return () => {
-        socketRef.current?.close();
-        socketRef.current = null;  // Reset the socket reference       
-        isWebSocketConnected.current = false; // Reset flag on cleanup
+            socketRef.current?.close();
+            socketRef.current = null;  // Reset the socket reference       
+            isWebSocketConnected.current = false; // Reset flag on cleanup
 
         };
-    
-      },[])
 
-      useEffect(() =>{
+    }, [])
+
+    useEffect(() => {
         scrollToBottom();
-      },[messages])
+    }, [messages])
 
-      const scrollToBottom = () => {
+    const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      };
-    
+    };
+
     //Reset the chat window
     const resetChat = () => {
         setMessages([]);
     }
 
-    console.log(messages,'my messages')
+    console.log(messages, 'my messages')
 
     return (
         <div>
@@ -174,40 +174,28 @@ const ChatWindowComponent = ({
                     </CardHeader>
                     <Separator className='mb-4' />
                     <CardContent className="flex flex-grow overflow-auto scrollbar-hide p-4 space-y-4 flex-col scroll-smooth">
-                        <Card>
+                        <div className='flex-col'>
+                            <div className='flex space-x-2'>
+                                <Avatar>
+                                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                                    <AvatarFallback>CN</AvatarFallback>
+                                </Avatar>
+                                <div className='flex flex-col space-y-2'>
 
-                            <CardContent className='flex items-end'>
-                                <div className='mt-6 h-24 w-24 bg-red-400 '>
-                                    <img src="/img/product.jpg" alt="image" className='w-full h-full '></img>
-                                </div>
-                                <div className='flex flex-col'>
-                                    <div className='font-semibold text-lg'>
-                                        SmartWatch BS 2000
-                                    </div>
-                                    <div className='text-slate-600'>
-                                        Smartwach with all the features you need
-
-                                    </div>
-                                    <div className='font-semibold'>
-                                        4,3/5 stars
-                                    </div>
-                                </div>
-                            </CardContent>
-                            <Separator className='my-4' />
-                            <CardFooter>
-                                <div className='w-full flex justify-between'>
-                                    <div className='font-semibold '>
-                                        300$
-                                    </div>
-                                    <div>
-                                        <Button variant={"default"} >
-                                            Buy now
-                                            </Button>
-
+                                    <div
+                                        className={`self-start p-2 rounded-lg max-w-xs`}
+                                    >
+                                        <div className='flex flex-col space-y-4'>
+                                            <div>
+                                                Hello, How can I assist you today?
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </CardFooter>
-                        </Card>
+
+                            </div>
+
+                        </div>
                         {messages.map((message) => (
                             <div className='flex-col'>
                                 <div className='flex space-x-2'>
@@ -256,46 +244,6 @@ const ChatWindowComponent = ({
                     <Separator className='mt-4' />
 
                     <CardFooter className='p-4 flex flex-col'>
-                        <div className='w-full mb-4'>
-                            <Carousel
-                                className='p-0'
-                                opts={{
-                                    align: 'start',
-                                    loop: true,
-                                    dragFree: true,
-                                }}
-                            >
-                                <CarouselContent>
-                                    <CarouselItem className="basis-1/2">
-                                        <button
-                                            onClick={() => sendMessage("How much is a 20ft container?")}
-                                        >
-                                            <Badge className='p-4 text-sm font-thin'>
-                                                How much is a 20ft container?
-                                            </Badge>
-                                        </button>
-                                    </CarouselItem>
-                                    <CarouselItem className="basis-1/2">
-                                        <button
-                                            onClick={() => sendMessage("What are your delivery options?")}
-                                        >
-                                            <Badge className='p-4 text-sm font-thin'>
-                                                What are your delivery options?
-                                            </Badge>
-                                        </button>
-                                    </CarouselItem>
-                                    <CarouselItem className="basis-1/2">
-                                        <button
-                                            onClick={() => sendMessage("Can I track my order?")}
-                                        >
-                                            <Badge className='p-4 text-sm font-thin'>
-                                                Can I track my order?
-                                            </Badge>
-                                        </button>
-                                    </CarouselItem>
-                                </CarouselContent>
-                            </Carousel>
-                        </div>
                         <div className='w-full'>
                             <form
                                 onSubmit={(e) => {
@@ -304,13 +252,14 @@ const ChatWindowComponent = ({
                                     setCurrentMessage('');
                                     socketRef.current?.send(JSON.stringify({
                                         'message': currentMessage
-                                      }))
+                                    }))
                                 }}
                                 className='grid grid-cols-9 w-full justify-between space-x-4 items-center'
                             >
                                 <Input
                                     className='col-span-8'
                                     onChange={(e) => setCurrentMessage(e.target.value)}
+                                    placeholder='Type your message...'
                                     value={currentMessage}
                                 />
                                 <button type="submit" className='col-span-1'>
