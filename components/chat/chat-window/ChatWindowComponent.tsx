@@ -1,35 +1,26 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/jsx-key */
 //imports
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 // import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-    Card,
-    CardContent,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { X, SendHorizontal, RefreshCcw } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-} from '@/components/ui/carousel';
-import { Badge } from '@/components/ui/badge';
-import Image from 'next/image';
-import {
     Avatar,
     AvatarFallback,
     AvatarImage,
-} from "@/components/ui/avatar"
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/avatar";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { RefreshCcw, SendHorizontal, X } from 'lucide-react';
+import Image from 'next/image';
 
 //Props
 type Props = {
