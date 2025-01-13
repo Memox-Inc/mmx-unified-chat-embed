@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/jsx-key */
 //imports
-import { useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 // import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -60,6 +60,7 @@ const ChatWindowComponent = ({
     // State Management
     const [currentMessage, setCurrentMessage] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
+    const [show, setShow] = useState<boolean>(false);
     const messagesEndRef = useRef<HTMLInputElement>(null);
     const socketRef = useRef<WebSocket | null>(null);
     const isWebSocketConnected = useRef(false);  // Track WebSocket connection status
@@ -71,24 +72,10 @@ const ChatWindowComponent = ({
     // State for the selected image
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    // Send Message function
-    const sendMessage = (messageContent: string) => {
-        if (messageContent.trim() === '') return; // Prevent sending empty messages
-        // setMessages([
-        //     ...messages,
-        //     { sessionId: "test", id: messages.length + 1, content: messageContent, sender: 'prospect' },
-        // ]);
-        socketRef.current?.send(JSON.stringify({
-            'message': messageContent
-        }))
-
-        setCurrentMessage('');
-    };
-
     useEffect(() => {
-        if (!isWebSocketConnected.current) {
+        if (!isWebSocketConnected.current && show) {
             const chatID = uuidv4()
-            const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/?org=1`)
+            const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/?org_id=1`)
             socketRef.current = ws;
             isWebSocketConnected.current = true; // Set to true to prevent future connections
             ws.onopen = () => {
@@ -96,6 +83,7 @@ const ChatWindowComponent = ({
             }
             ws.onmessage = (event) => {
                 const msgData = JSON.parse(event.data)
+                if (msgData?.type === "broadcast_message") return
                 setMessages((prevMessages) => [...prevMessages, msgData]);
             }
             ws.onclose = () => {
@@ -109,7 +97,7 @@ const ChatWindowComponent = ({
 
         };
 
-    }, [])
+    }, [show])
 
     useEffect(() => {
         scrollToBottom();
@@ -125,6 +113,17 @@ const ChatWindowComponent = ({
     }
 
     console.log(messages, 'my messages')
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+
+        setCurrentMessage('');
+        socketRef.current?.send(JSON.stringify({
+            'message': currentMessage,
+            'message_type': "text"
+        }))
+
+    }
 
     return (
         <div>
@@ -165,98 +164,138 @@ const ChatWindowComponent = ({
                     </CardHeader>
                     <Separator className='mb-4' />
                     <CardContent className="flex flex-grow overflow-auto scrollbar-hide p-4 space-y-4 flex-col scroll-smooth">
-                        <div className='flex-col'>
-                            <div className='flex space-x-2'>
-                                <Avatar>
-                                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                                    <AvatarFallback>CN</AvatarFallback>
-                                </Avatar>
-                                <div className='flex flex-col space-y-2'>
-
-                                    <div
-                                        className={`self-start p-2 rounded-lg max-w-xs`}
-                                    >
-                                        <div className='flex flex-col space-y-4'>
-                                            <div>
-                                                Hello, How can I assist you today?
-                                            </div>
-                                        </div>
+                        {
+                            !show ?
+                                <>
+                                    <div className='flex items-center gap-6'>
+                                        <label className='w-[27%]'>Full Name:</label>
+                                        <Input
+                                            className='w-[60%]'
+                                            // onChange={(e) => setCurrentMessage(e.target.value)}
+                                            placeholder='Full name'
+                                            value={currentMessage}
+                                        />
                                     </div>
-                                </div>
+                                    <div className='flex items-center gap-6'>
+                                        <label className='w-[27%]'>Email:</label>
+                                        <Input
+                                            className='w-[60%]'
+                                            // onChange={(e) => setCurrentMessage(e.target.value)}
+                                            placeholder='Email'
+                                            value={currentMessage}
+                                        />
+                                    </div>
+                                    <div className='flex items-center gap-6'>
+                                        <label className='w-[27%]'>Phone Number:</label>
+                                        <Input
+                                            className='w-[60%]'
+                                            // onChange={(e) => setCurrentMessage(e.target.value)}
+                                            placeholder='Phone number'
+                                            value={currentMessage}
+                                        />
+                                    </div>
 
-                            </div>
+                                </>
 
-                        </div>
-                        {messages.map((message) => (
-                            <div className='flex-col'>
-                                <div className='flex space-x-2'>
-                                    <Avatar>
-                                        <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                                        <AvatarFallback>CN</AvatarFallback>
-                                    </Avatar>
-                                    <div className='flex flex-col space-y-2'>
+                                : <>
 
-                                        <div
-                                            key={message.id}
-                                            className={`${message.sender_type === 'prospect' || message.sender === 'prospect'
-                                                ? `${userMessageColor} ${userTextColor} self-end`
-                                                : `${aiMessageColor} ${aiTextColor} self-start`
-                                                } p-2 rounded-lg max-w-xs`}
-                                        >
-                                            <div className='flex flex-col space-y-4'>
-                                                {message.image && (
-                                                    <div>
-                                                        <Image
-                                                            src={message.image || "/default-image.jpg"}
-                                                            alt="image"
-                                                            width={200}
-                                                            height={100}
-                                                            onClick={() => message.image && setSelectedImage(message.image)}
-                                                            className="cursor-pointer"
-                                                        />
+                                    <div className='flex-col'>
+                                        <div className='flex space-x-2'>
+                                            <Avatar>
+                                                <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                                                <AvatarFallback>CN</AvatarFallback>
+                                            </Avatar>
+                                            <div className='flex flex-col space-y-2'>
+
+                                                <div
+                                                    className={`self-start p-2 rounded-lg max-w-xs`}
+                                                >
+                                                    <div className='flex flex-col space-y-4'>
+                                                        <div>
+                                                            Hello, How can I assist you today?
+                                                        </div>
                                                     </div>
-                                                )}
-                                                <div>
-                                                    {message.content}
                                                 </div>
                                             </div>
+
                                         </div>
-                                        <div className='self-start'>
-                                            <p className='text-sm text-gray-400'>19:32</p>
-                                        </div>
+
                                     </div>
+                                    {messages.map((message) => (
+                                        <div className='flex-col'>
+                                            <div className='flex space-x-2'>
+                                                <Avatar>
+                                                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                                                    <AvatarFallback>CN</AvatarFallback>
+                                                </Avatar>
+                                                <div className='flex flex-col space-y-2'>
 
-                                </div>
+                                                    <div
+                                                        key={message.id}
+                                                        className={`${message.sender_type === 'prospect' || message.sender === 'prospect'
+                                                            ? `${userMessageColor} ${userTextColor} self-end`
+                                                            : `${aiMessageColor} ${aiTextColor} self-start`
+                                                            } p-2 rounded-lg max-w-xs`}
+                                                    >
+                                                        <div className='flex flex-col space-y-4'>
+                                                            {message.image && (
+                                                                <div>
+                                                                    <Image
+                                                                        src={message.image || "/default-image.jpg"}
+                                                                        alt="image"
+                                                                        width={200}
+                                                                        height={100}
+                                                                        onClick={() => message.image && setSelectedImage(message.image)}
+                                                                        className="cursor-pointer"
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                            <div>
+                                                                {message.content}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className='self-start'>
+                                                        <p className='text-sm text-gray-400'>19:32</p>
+                                                    </div>
+                                                </div>
 
-                            </div>
-                        ))}
-                        <div ref={messagesEndRef} />
+                                            </div>
+
+                                        </div>
+                                    ))}
+                                    <div ref={messagesEndRef} />
+                                </>
+
+                        }
                     </CardContent>
+
                     <Separator className='mt-4' />
 
                     <CardFooter className='p-4 flex flex-col'>
                         <div className='w-full'>
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    // sendMessage(currentMessage);
-                                    setCurrentMessage('');
-                                    socketRef.current?.send(JSON.stringify({
-                                        'message': currentMessage
-                                    }))
-                                }}
-                                className='grid grid-cols-9 w-full justify-between space-x-4 items-center'
-                            >
-                                <Input
-                                    className='col-span-8'
-                                    onChange={(e) => setCurrentMessage(e.target.value)}
-                                    placeholder='Type your message...'
-                                    value={currentMessage}
-                                />
-                                <button type="submit" className='col-span-1'>
-                                    <SendHorizontal />
-                                </button>
-                            </form>
+
+                            {
+                                !show ?
+                                    <button className='bg-primary text-white w-full rounded-[7px] py-2' onClick={() => setShow(!show)}>Start Chat</button>
+                                    :
+                                    <form
+                                        onSubmit={(e) => handleSubmit(e)}
+                                        className='grid grid-cols-9 w-full justify-between space-x-4 items-center'
+                                    >
+                                        <Input
+                                            className='col-span-8'
+                                            onChange={(e) => setCurrentMessage(e.target.value)}
+                                            placeholder='Type your message...'
+                                            value={currentMessage}
+                                        />
+                                        <button type="submit" className='col-span-1'>
+                                            <SendHorizontal />
+                                        </button>
+                                    </form>
+
+                            }
+
                         </div>
                     </CardFooter>
                 </Card>
