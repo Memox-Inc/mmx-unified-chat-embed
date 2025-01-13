@@ -52,7 +52,7 @@ export default function Home() {
       <ChatWindowComponent 
         chatTitleTextColor="text-slate-900"
         chatOpen={chatOpen} 
-        companyName="Company Name"
+        companyName="Memox"
         
         closeChat={closeChat} 
         userMessageColor="bg-gray-300" 
