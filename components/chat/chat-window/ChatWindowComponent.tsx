@@ -84,6 +84,7 @@ const ChatWindowComponent = ({
             ws.onmessage = (event) => {
                 const msgData = JSON.parse(event.data)
                 if (msgData?.type === "broadcast_message") return
+                else if (msgData?.message_type === "unread_message") return
                 setMessages((prevMessages) => [...prevMessages, msgData]);
             }
             ws.onclose = () => {
@@ -223,7 +224,7 @@ const ChatWindowComponent = ({
                                     </div>
                                     {messages.map((message) => (
                                         <div className='flex-col'>
-                                            <div className='flex space-x-2'>
+                                            <div className={`flex space-x-2 ${message.sender_type === 'prospect' ? 'flex-row-reverse justify-start gap-2' : ''}`}>
                                                 <Avatar>
                                                     <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
                                                     <AvatarFallback>CN</AvatarFallback>
