@@ -36,8 +36,8 @@ type Props = {
 };
 
 type Message = {
+    id: string; // Use a string ID for uniqueness
     sessionId: string;
-    id: number;
     content: string;
     sender?: 'prospect' | 'sales_rep' | 'ai';
     sender_type?: 'prospect' | 'sales_rep' | 'ai';
@@ -83,9 +83,43 @@ const ChatWindowComponent = ({
             }
             ws.onmessage = (event) => {
                 const msgData = JSON.parse(event.data)
-                if (msgData?.type === "broadcast_message") return
-                else if (msgData?.message_type === "unread_message") return
-                setMessages((prevMessages) => [...prevMessages, msgData]);
+                if (msgData?.type === "broadcast_message" || msgData?.message_type === "unread_message") return
+
+                if (msgData.sender_type === 'ai' || msgData.sender === 'ai') {
+                    setMessages((prevMessages) => {
+                        const lastMessage = prevMessages[prevMessages.length - 1];
+
+                        // If the last message is from the AI, append the new chunk to it
+                        if (lastMessage && (lastMessage.sender_type === 'ai' || lastMessage.sender === 'ai')) {
+                            const updatedMessages = [
+                                ...prevMessages.slice(0, -1), // Keep all messages except the last one
+                                {
+                                    ...lastMessage,
+                                    content: lastMessage.content + msgData.content, // Append the new chunk
+                                },
+                            ];
+
+                            // Scroll to bottom after updating the message
+                            setTimeout(scrollToBottom, 0);
+                            return updatedMessages;
+                        } else {
+                            // If the last message is not from the AI, add the new message
+                            const updatedMessages = [...prevMessages, msgData];
+                            setTimeout(scrollToBottom, 0);
+                            return updatedMessages;
+                        }
+                    });
+                } else {
+                    // For non-AI messages, append the message as usual
+                    setMessages((prevMessages) => {
+                        const updatedMessages = [...prevMessages, msgData];
+                        setTimeout(scrollToBottom, 0);
+                        return updatedMessages;
+                    });
+                }
+
+
+                // setMessages((prevMessages) => [...prevMessages, msgData]);
             }
             ws.onclose = () => {
                 console.error('Websocket Connection closed unexpectedly....')
@@ -113,17 +147,14 @@ const ChatWindowComponent = ({
         setMessages([]);
     }
 
-    console.log(messages, 'my messages')
-
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-
-        setCurrentMessage('');
         socketRef.current?.send(JSON.stringify({
             'message': currentMessage,
             'message_type': "text"
         }))
-
+        setCurrentMessage('');
+        
     }
 
     return (
@@ -223,7 +254,7 @@ const ChatWindowComponent = ({
 
                                     </div>
                                     {messages.map((message) => (
-                                        <div className='flex-col'>
+                                        <div className='flex-col' key={message.id}>
                                             <div className={`flex space-x-2 ${message.sender_type === 'prospect' ? 'flex-row-reverse justify-start gap-2' : ''}`}>
                                                 <Avatar>
                                                     <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
