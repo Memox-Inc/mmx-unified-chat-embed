@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import ChatButtonComponent from "@/components/chat/button/ChatButtonComponent";
 import ChatWindowComponent from "@/components/chat/chat-window/ChatWindowComponent";
-export default function Home() {
+export default function Home({chatflowId,embedMode}:{chatflowId:string, embedMode:boolean}) {
   //State Management for Chat Window
   const [chatOpen, setChatOpen] = useState(false);
+  console.log(chatflowId,embedMode)
 
   // Open and close chat window
   const openChat = () => {
