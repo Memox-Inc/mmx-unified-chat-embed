@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { RefreshCcw, SendHorizontal, X } from 'lucide-react';
 import Image from 'next/image';
+import { generateSecureWsParams } from '@/utils/wsAuth';
 
 //Props
 type Props = {
@@ -66,16 +67,16 @@ const ChatWindowComponent = ({
     const isWebSocketConnected = useRef(false);  // Track WebSocket connection status
 
 
-
-
-
     // State for the selected image
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     useEffect(() => {
         if (!isWebSocketConnected.current && show) {
             const chatID = uuidv4()
-            const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/?org_id=1`)
+            const org_id = "1"
+            const { hashed_org_id, hash } = generateSecureWsParams(org_id);
+
+            const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/?org_id=${hashed_org_id}&org=${hash}`)
             socketRef.current = ws;
             isWebSocketConnected.current = true; // Set to true to prevent future connections
             ws.onopen = () => {
