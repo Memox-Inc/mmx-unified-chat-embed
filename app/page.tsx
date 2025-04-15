@@ -3,9 +3,12 @@
 import { useState, useEffect } from "react";
 import ChatButtonComponent from "@/components/chat/button/ChatButtonComponent";
 import ChatWindowComponent from "@/components/chat/chat-window/ChatWindowComponent";
-export default function Home() {
+import { useSearchParams } from "next/navigation";
+export default function Home({params}: any) {
   //State Management for Chat Window
   const [chatOpen, setChatOpen] = useState(false);
+  const searchParams = useSearchParams()
+  const orgId = searchParams.get('orgId') ?? ""
 
   // Open and close chat window
   const openChat = () => {
@@ -58,6 +61,7 @@ export default function Home() {
         userMessageColor="bg-gray-300" 
         aiMessageColor="bg-black" 
         aiTextColor="text-white" 
+        orgId={orgId}
         userTextColor="text-black" />
     </>
   );
