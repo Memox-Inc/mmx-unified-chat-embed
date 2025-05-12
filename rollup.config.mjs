@@ -4,7 +4,7 @@ import { terser } from "rollup-plugin-terser";
 export default {
   input: './public/index.js',
   output: {
-    file: "embed/web.js",
+    file: "./public/web.js",
     format: "esm",
     sourcemap: true,
   },
