@@ -1,4 +1,4 @@
-class MyChatEmbed {
+class ChatBot {
     static init({ orgId, apiHost }) {
         const iframe = document.createElement("iframe");
         iframe.src = `${apiHost}/?orgId=${orgId}`;
@@ -16,5 +16,5 @@ class MyChatEmbed {
 }
 
 // Make available both as ESM and global variable
-export default MyChatEmbed;
-if (typeof window !== "undefined") window.MyChatEmbed = MyChatEmbed;
+export default ChatBot;
+if (typeof window !== "undefined") window.ChatBot = ChatBot;
