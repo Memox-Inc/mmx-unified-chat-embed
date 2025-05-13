@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { RefreshCcw, SendHorizontal, X } from 'lucide-react';
 import Image from 'next/image';
+import { generateSecureWsParams } from '@/utils/wsAuth';
 
 //Props
 type Props = {
@@ -33,6 +34,7 @@ type Props = {
     companyColor?: string;
     companyName?: string;
     chatTitleTextColor?: string;
+    orgId?:string
 };
 
 type Message = {
@@ -55,6 +57,7 @@ const ChatWindowComponent = ({
     chatOpen,
     aiTextColor,
     userTextColor,
+    orgId,
     closeChat,
 }: Props) => {
     // State Management
@@ -75,7 +78,10 @@ const ChatWindowComponent = ({
     useEffect(() => {
         if (!isWebSocketConnected.current && show) {
             const chatID = uuidv4()
-            const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/?org_id=1`)
+            const org_id = orgId!
+            const { hashed_org_id, hash } = generateSecureWsParams(org_id);
+
+            const ws = new WebSocket(`${process.env.NEXT_PUBLIC_SOCKET_URL}${chatID}/?org_id=${hashed_org_id}&org=${hash}`)
             socketRef.current = ws;
             isWebSocketConnected.current = true; // Set to true to prevent future connections
             ws.onopen = () => {
