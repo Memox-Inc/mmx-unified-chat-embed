@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import ChatButtonComponent from "@/components/chat/button/ChatButtonComponent";
 import ChatWindowComponent from "@/components/chat/chat-window/ChatWindowComponent";
 import { useSearchParams } from "next/navigation";
-export default function Home({params}: any) {
+export default function Home() {
   //State Management for Chat Window
   const [chatOpen, setChatOpen] = useState(false);
   const searchParams = useSearchParams()
