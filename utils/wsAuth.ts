@@ -9,7 +9,7 @@ export function generateSecureWsParams(org_id: string) {
     // const timestamp = Date.now().toString();
 
     // Create HMAC hash
-    const hash = crypto.createHmac('sha256', SECRET_KEY)
+    const hash = crypto.createHmac('sha256', "4f3c9a1d8e5b6c2f719a0e3d5a8b7c4d9e6f1a0b3d7c8e2f6a9d0e1b4c5f7a6d")
         .update(hashedOrgId)
         .digest('hex');
 
