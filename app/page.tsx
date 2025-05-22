@@ -1,10 +1,11 @@
 // Ensure 'use client' is at the top if using Next.js with React 18
 'use client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import ChatButtonComponent from "@/components/chat/button/ChatButtonComponent";
 import ChatWindowComponent from "@/components/chat/chat-window/ChatWindowComponent";
 import { useSearchParams } from "next/navigation";
-export default function Home() {
+
+function HomeContent() {
   //State Management for Chat Window
   const [chatOpen, setChatOpen] = useState(false);
   const searchParams = useSearchParams()
@@ -21,8 +22,8 @@ export default function Home() {
     console.log('Close Chat');
   };
 
-   // Use useEffect to handle the Escape key event
-   useEffect(() => {
+  // Use useEffect to handle the Escape key event
+  useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         closeChat();
@@ -49,20 +50,29 @@ export default function Home() {
         bottomMargin="bottom-5"
         onClick={openChat}
       />
-      
+
 
       {/* Always render the Chat Window */}
-      <ChatWindowComponent 
+      <ChatWindowComponent
         chatTitleTextColor="text-slate-900"
-        chatOpen={chatOpen} 
+        chatOpen={chatOpen}
         companyName="Memox"
-        
-        closeChat={closeChat} 
-        userMessageColor="bg-gray-300" 
-        aiMessageColor="bg-black" 
-        aiTextColor="text-white" 
+
+        closeChat={closeChat}
+        userMessageColor="bg-gray-300"
+        aiMessageColor="bg-black"
+        aiTextColor="text-white"
         orgId={orgId}
         userTextColor="text-black" />
     </>
+  );
+}
+
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
