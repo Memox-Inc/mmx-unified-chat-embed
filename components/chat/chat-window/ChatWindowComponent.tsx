@@ -93,7 +93,7 @@ const ChatWindowComponent = ({
 
                 if (msgData.sender_type === 'ai' || msgData.sender === 'ai') {
                     setMessages((prevMessages) => {
-                        const lastMessage = prevMessages[prevMessages.length - 1];
+                        const lastMessage = prevMessages[prevMessages?.length - 1];
 
                         // If the last message is from the AI, append the new chunk to it
                         if (lastMessage && (lastMessage.sender_type === 'ai' || lastMessage.sender === 'ai')) {
